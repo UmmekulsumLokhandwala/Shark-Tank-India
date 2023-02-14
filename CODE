@@ -1,0 +1,128 @@
+SELECT * FROM [Shark Tank India].dbo.Data
+
+-- Total episodes
+
+SELECT MAX(epno) FROM [Shark Tank India].dbo.Data
+SELECT COUNT(distinct epno) FROM [Shark Tank India].dbo.Data
+
+-- Pitches 
+
+SELECT COUNT(distinct brand) FROM [Shark Tank India].dbo.Data
+
+--Pitches converted
+
+SELECT cast(SUM(a.converted_not_converted) as float) /cast(COUNT(*) as float) FROM (
+SELECT Amountinvestedlakhs , case when Amountinvestedlakhs>0 then 1 else 0 end as converted_not_converted FROM [Shark Tank India].dbo.Data) a
+
+-- Total male
+
+SELECT SUM(male) FROM [Shark Tank India].dbo.Data
+
+-- Total female
+
+SELECT SUM(female) FROM [Shark Tank India].dbo.Data
+
+--Gender ratio
+
+SELECT SUM(female)/SUM(male) FROM [Shark Tank India].dbo.Data
+
+-- Total invested Amount
+
+SELECT SUM(Amountinvestedlakhs) FROM [Shark Tank India].dbo.Data
+
+-- AVG Equity taken
+
+SELECT AVG(a.Equitytakenp) FROM
+(SELECT * FROM [Shark Tank India].dbo.Data WHERE Equitytakenp>0) a
+
+--Highest deal taken
+
+SELECT MAX(Amountinvestedlakhs) FROM [Shark Tank India].dbo.Data
+
+--Highest Equity taken
+
+SELECT MAX(Equitytakenp) FROM [Shark Tank India].dbo.Data
+
+-- Startups having at least women
+
+SELECT SUM(a.female_COUNT) startups having at least women FROM (
+SELECT female,case when female>0 then 1 else 0 end as female_COUNT FROM [Shark Tank India].dbo.Data) a
+
+-- Pitches converted having atleast one women
+
+SELECT * FROM [Shark Tank India].dbo.Data
+
+
+SELECT SUM(b.female_COUNT) FROM(
+
+SELECT case when a.female>0 then 1 else 0 end as female_COUNT ,a.*FROM (
+(SELECT * FROM [Shark Tank India].dbo.Data WHERE deal!='No Deal')) a)b
+
+-- AVG team members
+
+SELECT AVG(teammembers) FROM [Shark Tank India].dbo.Data
+
+-- Amount invested per deal
+
+SELECT AVG(a.Amountinvestedlakhs) Amount_invested_per_deal FROM
+(SELECT * FROM [Shark Tank India].dbo.Data WHERE deal!='No Deal') a
+
+-- AVG age group of contestants
+
+SELECT AVGage,COUNT(AVGage) cnt FROM [Shark Tank India].dbo.Data group by AVGage order by cnt desc
+
+-- Location group of contestants
+
+SELECT Location,COUNT(Location) cnt FROM [Shark Tank India].dbo.Data group by Location order by cnt desc
+
+-- Sector group of contestants
+
+SELECT sector,COUNT(sector) cnt FROM [Shark Tank India].dbo.Data group by sector order by cnt desc
+
+
+--Partner deals
+
+SELECT partners,COUNT(partners) cnt FROM [Shark Tank India].dbo.Data  WHERE partners!='-' group by partners order by cnt desc
+
+-- Making the matrix
+
+
+SELECT * FROM [Shark Tank India].dbo.Data
+
+SELECT 'Ashnner' as keyy,COUNT(ashneerAmountinvested) FROM [Shark Tank India].dbo.Data WHERE ashneerAmountinvested is not null
+
+
+SELECT 'Ashnner' as keyy,COUNT(ashneerAmountinvested) FROM [Shark Tank India].dbo.Data WHERE ashneerAmountinvested is not null AND ashneerAmountinvested!=0
+
+SELECT 'Ashneer' as keyy,SUM(C.ASHNEERAMOUNTINVESTED),AVG(C.ASHNEEREQUITYTAKENP) 
+FROM (SELECT * FROM [Shark Tank India].dbo.Data  WHERE ASHNEEREQUITYTAKENP!=0 AND ASHNEEREQUITYTAKENP IS NOT NULL) C
+
+
+SELECT m.keyy,m.Total_deals_present,m.Total_deals,n.Total_Amount_invested,n.AVG_Equity_taken FROM
+
+(SELECT a.keyy,a.Total_deals_present,b.Total_deals FROM(
+
+SELECT 'Ashneer' as keyy,COUNT(ashneerAmountinvested) Total_deals_present FROM [Shark Tank India].dbo.Data WHERE ashneerAmountinvested is not null) a
+
+INNER JOIN (
+SELECT 'Ashneer' as keyy,COUNT(ashneerAmountinvested) Total_deals FROM [Shark Tank India].dbo.Data
+WHERE ashneerAmountinvested is not null AND ashneerAmountinvested!=0) b 
+
+on a.keyy=b.keyy) m
+
+INNER JOIN 
+
+(SELECT 'Ashneer' as keyy,SUM(C.ASHNEERAMOUNTINVESTED) Total_Amount_invested,
+AVG(C.ASHNEEREQUITYTAKENP) AVG_Equity_taken
+FROM (SELECT * FROM [Shark Tank India].dbo.Data  WHERE ASHNEEREQUITYTAKENP!=0 AND ASHNEEREQUITYTAKENP IS NOT NULL) C) n
+
+on m.keyy=n.keyy
+
+-- which is the startup in which the highest Amount has been invested in each domain/sector
+
+SELECT c.* FROM 
+(SELECT brand,sector,Amountinvestedlakhs,rank() over(partition by sector order by Amountinvestedlakhs desc) rnk 
+
+FROM [Shark Tank India].dbo.Data) c
+
+WHERE c.rnk=1
